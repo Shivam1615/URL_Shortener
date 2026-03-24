@@ -11,7 +11,7 @@ Creates a URL_Shortener and displays clicks analytics data in a UI dashboard
       - MockMvc (Integration tests)
 
    ## Frontend
-      - React + Vite
+      - React
       - Axios for API calls
    
    ## AI Tools
@@ -27,8 +27,8 @@ Creates a URL_Shortener and displays clicks analytics data in a UI dashboard
    **Flyway over Hibernate DDL** 
       — Hibernate's `ddl-auto` is not safe for production as it can drop and recreate tables on restart. Flyway runs versioned migrations in order and never runs them twice.
 
-   **React + Vite** 
-      — Fast development setup. Vite's dev server proxies API calls cleanly during development.
+   **React + Axios** 
+      — Fast development setup. Axios simplifies API requests and data management.
 
 ## Getting Started
 
