@@ -1,121 +1,115 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
-import './App.css'
+import { useState, useEffect } from 'react'
+import { getAllLinks } from './api/client'
+import CreateLinkForm from './components/CreateLinkForm'
+import LinkTable from './components/LinkTable'
+import AnalyticsView from './components/AnalyticsView'
 
-function App() {
-  const [count, setCount] = useState(0)
+export default function App() {
+  const [links, setLinks] = useState([])
+  const [selectedLink, setSelectedLink] = useState(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
+
+  const fetchLinks = async () => {
+    try {
+      const data = await getAllLinks()
+      setLinks(data)
+    } catch (err) {
+      setError('Failed to load links')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    fetchLinks()
+  }, [])
+
+  const handleViewAnalytics = (linkId) => {
+    const link = links.find((l) => l.id === linkId)
+    setSelectedLink(link)
+  }
+
+  const handleBack = () => {
+    setSelectedLink(null)
+  }
 
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.jsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
+    <div style={styles.page}>
+      <nav style={styles.nav}>
+        
+        <div style={styles.navLabel}>URL Shortener</div>
+      </nav>
 
-      <div className="ticks"></div>
-
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
-
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
+      <div style={styles.content}>
+        {selectedLink ? (
+          <AnalyticsView link={selectedLink} onBack={handleBack} />
+        ) : (
+          <>
+            <CreateLinkForm onLinkCreated={fetchLinks} />
+            {loading && (
+              <div style={styles.message}>Loading links...</div>
+            )}
+            {error && (
+              <div style={styles.error}>{error}</div>
+            )}
+            {!loading && !error && (
+              <LinkTable
+                links={links}
+                onViewAnalytics={handleViewAnalytics}
+              />
+            )}
+          </>
+        )}
+      </div>
+    </div>
   )
 }
 
-export default App
+const styles = {
+  page: {
+    minHeight: '100vh',
+    padding: '0 24px 80px'
+  },
+  nav: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: '24px 0 48px',
+    borderBottom: '1px solid #2a2a2a',
+    marginBottom: 48
+  },
+  logo: {
+    fontFamily: 'IBM Plex Mono, monospace',
+    fontSize: 20,
+    fontWeight: 600,
+    color: '#d4f76e',
+    letterSpacing: -0.5
+  },
+  logoDim: {
+    color: '#666'
+  },
+  navLabel: {
+    fontFamily: 'IBM Plex Mono, monospace',
+    fontSize: 12,
+    color: '#666'
+  },
+  content: {
+    maxWidth: 860,
+    margin: '0 auto'
+  },
+  message: {
+    fontFamily: 'IBM Plex Mono, monospace',
+    fontSize: 14,
+    color: '#666',
+    textAlign: 'center',
+    padding: '64px 0'
+  },
+  error: {
+    fontFamily: 'IBM Plex Mono, monospace',
+    fontSize: 14,
+    color: '#ff5f5f',
+    textAlign: 'center',
+    padding: '64px 0'
+  }
+}
